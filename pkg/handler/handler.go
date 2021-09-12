@@ -11,6 +11,8 @@ type Handler struct {
 }
 
 func (h *Handler) InitRoutes() {
+	Names = initNames(Names)
+
 	h.bot.Handle(telebot.OnText, h.getWeather)
 }
 

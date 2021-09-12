@@ -18,13 +18,18 @@ func (s *Server) Run(h *Handler) {
 }
 
 func NewBotServer() *Server {
-	bot, err := telebot.NewBot(telebot.Settings{
-		// You can also set custom API URL.
-		// If field is empty it equals to "https://api.telegram.org".
-		URL: "https://api.telegram.org",
+	poller := &telebot.LongPoller{Timeout: 15 * time.Second}
+	authMiddleware := telebot.NewMiddlewarePoller(poller, func(upd *telebot.Update) bool {
+		if !isUser(upd.Message.Sender.Username) {
+			return false
+		}
 
+		return true
+	})
+
+	bot, err := telebot.NewBot(telebot.Settings{
 		Token:  "1442509990:AAE4L0qMEhebu1xHNWSnqTBx7o5SQGEOtlI",
-		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
+		Poller: authMiddleware,
 	})
 
 	if err != nil {
