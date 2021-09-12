@@ -4,6 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/tucnak/telebot.v2"
 	"log"
+	"os"
 	"time"
 )
 
@@ -28,7 +29,7 @@ func NewBotServer() *Server {
 	})
 
 	bot, err := telebot.NewBot(telebot.Settings{
-		Token:  "1442509990:AAE4L0qMEhebu1xHNWSnqTBx7o5SQGEOtlI",
+		Token:  os.Getenv("BOT_TOKEN"),
 		Poller: authMiddleware,
 	})
 
