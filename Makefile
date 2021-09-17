@@ -6,6 +6,9 @@ build:
 run: build
 	./.bin/bot
 
+clear:
+	rm -rf ./.bin
+
 build-image:
 	docker build -t tg-sn-weatherbot:v0.1 .
 
