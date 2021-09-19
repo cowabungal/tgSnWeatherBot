@@ -1,6 +1,6 @@
 db:
-  username: "postgres"
-  host: "localhost"
-  port: "5433"
-  dbname: "postgres"
-  sslmode: "disable"
+  username: "ueoytzpgmzewys"
+  host: "ec2-54-147-126-173.compute-1.amazonaws.com"
+  port: "5432"
+  dbname: "de6g16cndgd869"
+  sslmode: "require"

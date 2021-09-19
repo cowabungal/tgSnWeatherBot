@@ -14,7 +14,9 @@ func (s *Server) getWeather (m *telebot.Message) {
 		return
 	}
 
-	_, err = s.bot.Send(m.Sender, weatherMessage(weatherData))
+	name := s.GetUserName(m.Sender.ID)
+
+	_, err = s.bot.Send(m.Sender, weatherMessage(weatherData, name))
 	if err != nil {
 		logrus.Error("getWeather: Send: " + err.Error())
 		return

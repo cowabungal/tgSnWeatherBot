@@ -2,31 +2,20 @@ package server
 
 import (
 	"fmt"
-	"math/rand"
-	"os"
+	"github.com/sirupsen/logrus"
 	"tgSnWeatherBot"
-	"time"
 )
 
-var Names = make([]string, 0, 0)
-
-func weatherMessage(data *tgSnWeatherBot.WeatherData) string {
-	return fmt.Sprintf(pickName(Names) + ", температура в Москве: %.0f°C", data.Temperature)
+func weatherMessage(data *tgSnWeatherBot.WeatherData, name string) string {
+	return fmt.Sprintf("%s, температура в Москве: %.0f°C", name, data.Temperature)
 }
 
-func initNames(names []string) []string {
-	namesCount := 6
-
-	for i := 0; i <= namesCount; i++ {
-		names = append(names, os.Getenv(fmt.Sprintf("NAME%d", i)))
+func (s *Server) GetUserName(userId int) string {
+	name, err := s.service.User.Name(userId)
+	if err != nil {
+		logrus.Error("error: server: GetUserName: " + err.Error())
+		return "Юзер"
 	}
 
-	return names
-}
-
-func pickName(names []string) string {
-	rand.Seed(time.Now().UnixNano())
-	randomIndex := rand.Intn(len(names))
-
-	return names[randomIndex]
+	return name
 }

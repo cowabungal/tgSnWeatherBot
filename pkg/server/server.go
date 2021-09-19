@@ -15,8 +15,6 @@ type Server struct {
 }
 
 func (s *Server) InitRoutes() {
-	Names = initNames(Names)
-
 	s.bot.Handle(telebot.OnText, s.getWeather)
 }
 
@@ -46,7 +44,10 @@ func NewBotServer(s *service.Service) *Server {
 			Poller: poller,
 		})
 
+		logrus.Printf("message from: %s; id: %d; ms: %s", upd.Message.Sender.Username, upd.Message.Sender.ID, upd.Message.Text)
 		bot.Send(upd.Message.Sender, "Введи пароль, чтобы продолжить работу с ботом.")
+
+		logrus.Printf("Bot send message: <<weatherMessage>> to %s", upd.Message.Sender.Username)
 
 		return false
 	})
