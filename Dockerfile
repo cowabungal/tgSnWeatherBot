@@ -6,14 +6,13 @@ COPY . /tgSnWeatherBot/
 WORKDIR /tgSnWeatherBot/
 
 RUN go mod download
-RUN GOOS=linux go build -o ./.bin/bot ./cmd/bot/main.go
+RUN GOOS=linux go build -o ./.bin/bot /cmd/bot/main.go
 
 FROM alpine:latest
 
 WORKDIR /root/
 
 COPY --from=0 /tgSnWeatherBot/.bin/bot .
-COPY --from=0 /tgSnWeatherBot/.env .
 
 EXPOSE 80
 

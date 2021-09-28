@@ -1,6 +1,7 @@
 package server
 
 import (
+	"os"
 	"tgSnWeatherBot/pkg/service"
 )
 
@@ -8,8 +9,8 @@ type AuthServer struct {
 	service *service.Service
 }
 
-func NewAuthServer(service *service.Service) *AuthServer {
-	return &AuthServer{service: service}
+func NewAuthServer(s *service.Service) *AuthServer {
+	return &AuthServer{service: s}
 }
 
 func (s *AuthServer) isUser(userId int) bool {
@@ -22,7 +23,7 @@ func (s *AuthServer) isUser(userId int) bool {
 }
 
 func isPassword(password string) bool {
-	return password == "123"
+	return password == os.Getenv("BOT_PASSWORD")
 }
 
 func (s *AuthServer) createUser(username string, userId int) {

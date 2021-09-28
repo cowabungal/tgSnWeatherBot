@@ -12,10 +12,18 @@ import (
 type Server struct {
 	service *service.Service
 	bot *telebot.Bot
+	buttons *Buttons
 }
 
 func (s *Server) InitRoutes() {
-	s.bot.Handle(telebot.OnText, s.getWeather)
+	s.bot.Handle("Погода", s.getWeather)
+	s.bot.Handle(os.Getenv("BOT_PASSWORD"), s.mainButtons)
+	newCity := changeCity(s.buttons.Button)
+
+	//unique цельный
+	s.bot.Handle(&newCity, s.changeCity)
+	s.bot.Handle("Профиль", s.profile)
+	s.bot.Handle(telebot.OnText, s.text)
 }
 
 func (s *Server) Run() {
@@ -30,13 +38,31 @@ func NewBotServer(s *service.Service) *Server {
 	poller := &telebot.LongPoller{Timeout: 15 * time.Second}
 
 	authMiddleware := telebot.NewMiddlewarePoller(poller, func(upd *telebot.Update) bool {
-		if authServer.isUser(upd.Message.Sender.ID) {
-			return true
-		}
 
-		if isPassword(upd.Message.Text) {
-			authServer.createUser(upd.Message.Sender.Username, upd.Message.Sender.ID)
-			return true
+		if upd.Message == nil {
+			switch upd.Query {
+			case nil:
+				if upd.Callback == nil {
+					return false
+				} else {
+					if authServer.isUser(upd.Callback.Sender.ID) {
+						return true
+					}
+				}
+			default:
+				if authServer.isUser(upd.Query.From.ID) {
+					return true
+				}
+			}
+		} else {
+			if authServer.isUser(upd.Message.Sender.ID) {
+				return true
+			}
+
+			if isPassword(upd.Message.Text) {
+				authServer.createUser(upd.Message.Sender.Username, upd.Message.Sender.ID)
+				return true
+			}
 		}
 
 		bot, _ := telebot.NewBot(telebot.Settings{
@@ -52,7 +78,7 @@ func NewBotServer(s *service.Service) *Server {
 		return false
 	})
 
-	bot, err := telebot.NewBot(telebot.Settings{
+	b, err := telebot.NewBot(telebot.Settings{
 		Token:  os.Getenv("BOT_TOKEN"),
 		Poller: authMiddleware,
 	})
@@ -61,6 +87,7 @@ func NewBotServer(s *service.Service) *Server {
 		log.Fatal(err)
 		return nil
 	}
-
-	return &Server{service: s, bot: bot}
+	menu := &telebot.ReplyMarkup{ResizeReplyKeyboard: true}
+	bu := NewButtons(menu)
+	return &Server{service: s, bot: b, buttons: bu}
 }

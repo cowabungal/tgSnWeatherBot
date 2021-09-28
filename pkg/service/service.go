@@ -21,9 +21,11 @@ type Authorization interface {
 }
 
 type Weather interface {
-	Get() (*tgSnWeatherBot.WeatherData, error)
+	Get(city string) (*tgSnWeatherBot.WeatherData, error)
 }
 
 type User interface {
 	Name (userId int) (string, error)
+	City (userId int) (string, error)
+	ChangeCity (userId int, newCity string) (string, error)
 }

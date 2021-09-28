@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD city VARCHAR(30) NOT NULL DEFAULT 'Москва';

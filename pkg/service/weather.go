@@ -14,7 +14,7 @@ func NewWeatherService() *WeatherService {
 	return &WeatherService{}
 }
 
-func (s *WeatherService) Get() (*tgSnWeatherBot.WeatherData, error) {
+func (s *WeatherService) Get(city string) (*tgSnWeatherBot.WeatherData, error) {
 	apiKey := os.Getenv("OWM_API_KEY")
 
 	w, err := owm.NewCurrent("C", "ru", apiKey)
@@ -22,7 +22,7 @@ func (s *WeatherService) Get() (*tgSnWeatherBot.WeatherData, error) {
 		return nil, err
 	}
 
-	err = w.CurrentByName("Moscow")
+	err = w.CurrentByName(city)
 	if err != nil {
 		return nil, err
 	}

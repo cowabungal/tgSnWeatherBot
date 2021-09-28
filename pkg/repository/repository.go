@@ -18,4 +18,6 @@ type Authorization interface {
 
 type User interface {
 	Name(userId int) (string, error)
+	City(userId int) (string, error)
+	ChangeCity (userId int, newCity string) (string, error)
 }

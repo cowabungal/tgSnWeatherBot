@@ -7,8 +7,9 @@ import (
 
 func (s *Server) getWeather (m *telebot.Message) {
 	logrus.Printf("message from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
+	user := s.NewUser(m.Sender)
 
-	weatherData, err := s.service.Weather.Get()
+	weatherData, err := s.service.Weather.Get(user.City)
 	if err != nil {
 		logrus.Error("getWeather: Get: " + err.Error())
 		return
@@ -16,7 +17,7 @@ func (s *Server) getWeather (m *telebot.Message) {
 
 	name := s.GetUserName(m.Sender.ID)
 
-	_, err = s.bot.Send(m.Sender, weatherMessage(weatherData, name))
+	_, err = s.bot.Send(m.Sender, weatherMessage(weatherData, name, user))
 	if err != nil {
 		logrus.Error("getWeather: Send: " + err.Error())
 		return
