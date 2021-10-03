@@ -20,3 +20,11 @@ func (s *AuthService) IsUser(userId int) error {
 func (s *AuthService) CreateUser(username string, userId int) error {
 	return s.repo.Authorization.CreateUser(username, userId)
 }
+
+func (s *AuthService) IsAdmin(userId int) error {
+	return s.repo.Authorization.IsAdmin(userId)
+}
+
+func (s *AuthService) CreateAdmin(username string, userId int) error {
+	return s.repo.Authorization.CreateAdmin(username, userId)
+}

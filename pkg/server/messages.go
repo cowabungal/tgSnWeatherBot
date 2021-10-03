@@ -31,3 +31,11 @@ func (s *Server) GetUserName(userId int) string {
 func textMessage(name string) string {
 	return fmt.Sprintf("%s, нажми на кнопку 'Погода'", name)
 }
+
+func usersListMessage(list []tgSnWeatherBot.User) string {
+	return fmt.Sprintf("Количество пользователей: %d", len(list))
+}
+
+func userSettingsMessage(user *tgSnWeatherBot.User) string {
+	return fmt.Sprintf("Настройки пользователя: %s", user.Username)
+}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/tucnak/telebot.v2"
+	"strconv"
 )
 
 func (s *Server) mainButtons (m *telebot.Message) {
@@ -45,14 +46,44 @@ func (s *Server) changeCityAns (m *telebot.Message) {
 	s.bot.Send(m.Sender, fmt.Sprintf("Город успешно изменен на: %s", city))
 }
 
+func (s *Server) changeCityAdm (c *telebot.Callback) {
+	err := s.bot.Respond(c, &telebot.CallbackResponse{Text: "Отправь название города"})
+	if err != nil {
+		logrus.Error("changeCity: Respond: " + err.Error())
+	}
+
+	logrus.Printf("city from: %s; id: %d; ms: %s", c.Sender.Username, c.Sender.ID, c.Data)
+
+	s.bot.Send(c.Sender, "Отправь название города")
+
+	s.data.prevCallback = c
+	s.bot.Handle(telebot.OnText, s.changeCityAnsAdm)
+}
+
+func (s *Server) changeCityAnsAdm (m *telebot.Message) {
+	logrus.Printf("city from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
+	c := s.data.prevCallback
+
+	userId, _ := strconv.Atoi(c.Data)
+	user, err := s.getUser(userId)
+	if err != nil {
+		logrus.Error("citySettings: getUser: " + err.Error())
+		return
+	}
+
+	city := m.Text
+
+	city, err = s.service.User.ChangeCity(user.UserId, city)
+	if err != nil {
+		s.bot.Send(m.Sender, "Ошибка в названии города.")
+		return
+	}
+
+	s.bot.Send(m.Sender, fmt.Sprintf("Город успешно изменен на: %s", city))
+}
 
 func (s *Server) text (m *telebot.Message) {
 	logrus.Printf("message from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
 	name := s.GetUserName(m.Sender.ID)
-	s.bot.Send(m.Sender, textMessage(name), s.buttons.Main())
-}
-
-func (s *Server) settingsBut (m *telebot.Message) {
-	user := s.NewUser(m.Sender)
-	s.bot.Send(m.Sender, "Settings!", s.buttons.Settings(user))
+	s.bot.Send(m.Sender, textMessage(name))
 }

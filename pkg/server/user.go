@@ -18,3 +18,7 @@ func (s *Server) NewUser(u *telebot.User) *tgSnWeatherBot.User {
 		City:     city,
 	}
 }
+
+func (s *Server) getUser(userId int) (*tgSnWeatherBot.User, error) {
+	return s.service.User.Info(userId)
+}

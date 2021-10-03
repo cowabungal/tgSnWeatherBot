@@ -10,19 +10,32 @@ import (
 )
 
 type Server struct {
-	service *service.Service
-	bot *telebot.Bot
-	buttons *Buttons
+	service    *service.Service
+	bot        *telebot.Bot
+	buttons    *Buttons
+	data *Data
+}
+
+type Data struct {
+	prevCallback *telebot.Callback
+}
+
+func NewData() *Data {
+	return &Data{}
 }
 
 func (s *Server) InitRoutes() {
 	s.bot.Handle("Погода", s.getWeather)
 	s.bot.Handle(os.Getenv("BOT_PASSWORD"), s.mainButtons)
+	s.bot.Handle("/start", s.mainButtons)
 	newCity := changeCity(s.buttons.Button)
 
 	//unique цельный
 	s.bot.Handle(&newCity, s.changeCity)
 	s.bot.Handle("Профиль", s.profile)
+	s.bot.Handle("Юзер-панель", s.mainButtons)
+	s.bot.Handle("Админ-панель", s.admin)
+	s.bot.Handle("Пользователи", s.usersList)
 	s.bot.Handle(telebot.OnText, s.text)
 }
 
@@ -89,5 +102,6 @@ func NewBotServer(s *service.Service) *Server {
 	}
 	menu := &telebot.ReplyMarkup{ResizeReplyKeyboard: true}
 	bu := NewButtons(menu)
-	return &Server{service: s, bot: b, buttons: bu}
+	data := NewData()
+	return &Server{service: s, bot: b, buttons: bu, data: data}
 }

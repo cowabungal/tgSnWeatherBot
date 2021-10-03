@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/sirupsen/logrus"
+	"tgSnWeatherBot"
 	"tgSnWeatherBot/pkg/repository"
 )
 
@@ -13,8 +14,16 @@ func NewUserService(repo *repository.Repository) *UserService {
 	return &UserService{repo: repo}
 }
 
+func (s *UserService) AddName(userId int, name string) (string, error) {
+	return s.repo.User.AddName(userId, name)
+}
+
 func (s *UserService) Name(userId int) (string, error) {
 	return s.repo.User.Name(userId)
+}
+
+func (s *UserService) DeleteName(userId int, name string) error {
+	return s.repo.User.DeleteName(userId, name)
 }
 
 func (s *UserService) City(userId int) (string, error) {
@@ -40,4 +49,8 @@ func validateCity(newCity string) error {
 	}
 
 	return nil
+}
+
+func (s *UserService) Info(userId int) (*tgSnWeatherBot.User, error) {
+	return s.repo.User.Info(userId)
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"gopkg.in/tucnak/telebot.v2"
 	"os"
 	"tgSnWeatherBot/pkg/service"
 )
@@ -31,4 +32,18 @@ func (s *AuthServer) createUser(username string, userId int) {
 	if err != nil {
 		return
 	}
+}
+
+func (s *Server) adminPass (m *telebot.Message) {
+	err := s.service.Authorization.CreateAdmin(m.Sender.Username, m.Sender.ID)
+	if err != nil {
+		return
+	}
+
+	adminBut := s.buttons.MainAdmin()
+	s.bot.Send(m.Sender, "Вы успешно залогинены в аккаунт администратора.", adminBut)
+}
+
+func (s *Server) adminNoPass (m *telebot.Message) {
+	s.bot.Send(m.Sender, "Пароль неверный. Введите корректный пароль для доступа к админ-панели.")
 }
