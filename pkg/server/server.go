@@ -97,7 +97,7 @@ func NewBotServer(s *service.Service) *Server {
 		log.Fatal(err)
 		return nil
 	}
-	menu := &telebot.ReplyMarkup{ResizeReplyKeyboard: true}
+	menu := telebot.ReplyMarkup{ResizeReplyKeyboard: true}
 	bu := buttons.NewButtons(menu)
 	data := NewData()
 	return &Server{service: s, bot: b, button: bu, data: data}

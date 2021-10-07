@@ -9,7 +9,8 @@ import (
 
 func (s *Server) mainButtons(m *telebot.Message) {
 	logrus.Printf("password from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
-	s.bot.Send(m.Sender, "Привет. Я - бот, который подскажет тебе погоду на улице.", s.button.Main())
+	main := s.button.Main()
+	s.bot.Send(m.Sender, "Привет. Я - бот, который подскажет тебе погоду на улице.", &main)
 }
 
 func (s *Server) profile(m *telebot.Message) {
@@ -22,7 +23,7 @@ func (s *Server) profile(m *telebot.Message) {
 
 	main, cityBut, namesBut := s.button.UserSettings(user)
 	//profileInline, cityBut, sendingSetting := s.button.ProfileInline()
-	s.bot.Send(m.Sender, profileMessage(user), main)
+	s.bot.Send(m.Sender, profileMessage(user), &main)
 
 	s.bot.Handle(&cityBut, s.citySettings)
 	s.bot.Handle(&namesBut, s.namesSettings)

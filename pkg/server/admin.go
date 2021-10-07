@@ -19,12 +19,16 @@ func (s *Server) admin (m *telebot.Message) {
 		s.bot.Handle(telebot.OnText, s.adminNoPass)
 	} else {
 		adminBut := s.button.MainAdmin()
-		s.bot.Send(m.Sender, "Вы успешно вошли в аккаунт администратора.", adminBut)
+		s.bot.Send(m.Sender, "Вы успешно вошли в аккаунт администратора.", &adminBut)
 	}
 }
 
 func (s *Server) usersList (m *telebot.Message) {
 	logrus.Printf("usersList from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
+	err := s.service.Authorization.IsAdmin(m.Sender.ID)
+	if err != nil {
+		return
+	}
 
 	// получаем список юзеров
 	usersList, err := s.service.Admin.UsersList()
@@ -34,7 +38,7 @@ func (s *Server) usersList (m *telebot.Message) {
 
 	// получаем сгусток инлайн кнопок и массив самих кнопок
 	usersListInline, usersButtons := s.button.UserList(usersList)
-	s.bot.Send(m.Sender, usersListMessage(usersList), usersListInline)
+	s.bot.Send(m.Sender, usersListMessage(usersList), &usersListInline)
 
 	// обработчик нажатий на юзера
 	for _, v := range usersButtons {
@@ -55,7 +59,7 @@ func (s *Server) userSettings(c *telebot.Callback) {
 
 	main, cityBut, namesBut := s.button.UserSettings(user)
 
-	s.bot.Edit(c.Message, userSettingsMessage(user), main)
+	s.bot.Edit(c.Message, userSettingsMessage(user), &main)
 
 	s.bot.Handle(&cityBut, s.citySettings)
 	s.bot.Handle(&namesBut, s.namesSettings)
@@ -74,7 +78,7 @@ func (s *Server) citySettings(c *telebot.Callback) {
 
 	main, city, changeCity, returnBut := s.button.CitySettings(user)
 
-	s.bot.Edit(c.Message, userSettingsMessage(user), main)
+	s.bot.Edit(c.Message, userSettingsMessage(user), &main)
 
 	s.bot.Handle(&city, s.citySettings)
 	s.bot.Handle(&changeCity, s.changeCityAdm)
@@ -94,7 +98,7 @@ func (s *Server) namesSettings(c *telebot.Callback) {
 
 	// получаем сгусток инлайн кнопок и массив самих кнопок
 	namesListInline, returnBut, nameAddBut := s.button.NamesList(user)
-	s.bot.Edit(c.Message, userSettingsMessage(user), namesListInline)
+	s.bot.Edit(c.Message, userSettingsMessage(user), &namesListInline)
 
 	list := namesListInline.InlineKeyboard[:len(namesListInline.InlineKeyboard)]
 
@@ -124,7 +128,7 @@ func (s *Server) nameSettings(c *telebot.Callback) {
 
 	main, nameIn, deleteBut, returnBut := s.button.Name(name, userId)
 
-	s.bot.Edit(c.Message, userSettingsMessage(user), main)
+	s.bot.Edit(c.Message, userSettingsMessage(user), &main)
 	s.bot.Handle(&nameIn, s.nameSettings)
 	s.bot.Handle(&deleteBut, s.preDeleteName)
 	s.bot.Handle(&returnBut, s.namesSettings)
@@ -146,7 +150,7 @@ func (s *Server) preDeleteName(c *telebot.Callback) {
 
 	main, yes, no := s.button.YesOrNo(name, userId)
 
-	s.bot.Edit(c.Message,fmt.Sprintf("Вы уверены, что хотите удалить имя '%s' у пользователя: %s?", name, user.Username), main)
+	s.bot.Edit(c.Message,fmt.Sprintf("Вы уверены, что хотите удалить имя '%s' у пользователя: %s?", name, user.Username), &main)
 	s.bot.Handle(&yes, s.deleteNameAdm)
 	s.bot.Handle(&no, s.nameSettings)
 }
@@ -181,7 +185,7 @@ func (s *Server) preAddName(c *telebot.Callback) {
 
 	main, returnBut := s.button.ReturnInline(user)
 
-	s.bot.Edit(c.Message,fmt.Sprintf("Отправьте новое имя для пользователя: %s", user.Username), main)
+	s.bot.Edit(c.Message,fmt.Sprintf("Отправьте новое имя для пользователя: %s", user.Username), &main)
 	s.bot.Handle(&returnBut, s.namesSettings)
 
 	s.data.prevCallback = c

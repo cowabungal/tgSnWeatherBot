@@ -8,10 +8,10 @@ import (
 )
 
 // UserList возвращает инлайн кнопку со списком пользователей по username
-func (s *Buttons) UserList(list []tgSnWeatherBot.User) (*telebot.ReplyMarkup, []telebot.Btn) {
+func (s *Buttons) UserList(list []tgSnWeatherBot.User) (telebot.ReplyMarkup, []telebot.Btn) {
 	main := s.Button
 
-	butList := userSlc(list, main)
+	butList := userSlc(list, &main)
 
 	main.Inline(
 		butList,
@@ -31,11 +31,11 @@ func userSlc(list []tgSnWeatherBot.User, main *telebot.ReplyMarkup) []telebot.Bt
 }
 
 // UserSettings return main, city, namesCount
-func (s *Buttons) UserSettings(user *tgSnWeatherBot.User) (*telebot.ReplyMarkup, telebot.Btn, telebot.Btn) {
+func (s *Buttons) UserSettings(user *tgSnWeatherBot.User) (telebot.ReplyMarkup, telebot.Btn, telebot.Btn) {
 	main := s.Button
 
-	city := cityBut(user, main)
-	namesCount := namesCountBut(user, main)
+	city := cityBut(user, &main)
+	namesCount := namesCountBut(user, &main)
 
 	main.Inline(
 		main.Row(city),
@@ -45,9 +45,9 @@ func (s *Buttons) UserSettings(user *tgSnWeatherBot.User) (*telebot.ReplyMarkup,
 	return main, city, namesCount
 }
 
-func (s *Buttons) ReturnInline(user *tgSnWeatherBot.User) (*telebot.ReplyMarkup, telebot.Btn) {
+func (s *Buttons) ReturnInline(user *tgSnWeatherBot.User) (telebot.ReplyMarkup, telebot.Btn) {
 	main := s.Button
-	returnBut := returnBut(user, main)
+	returnBut := returnBut(user, &main)
 
 	main.Inline(
 		main.Row(returnBut),
@@ -57,12 +57,12 @@ func (s *Buttons) ReturnInline(user *tgSnWeatherBot.User) (*telebot.ReplyMarkup,
 }
 
 // CitySettings return main, city, changeCityBut, returnBut
-func (s *Buttons) CitySettings(user *tgSnWeatherBot.User) (*telebot.ReplyMarkup, telebot.Btn, telebot.Btn, telebot.Btn) {
+func (s *Buttons) CitySettings(user *tgSnWeatherBot.User) (telebot.ReplyMarkup, telebot.Btn, telebot.Btn, telebot.Btn) {
 	main := s.Button
 
-	city := cityBut(user, main)
-	changeCity := changeCityAdmBut(user, main)
-	returnBut := returnBut(user, main)
+	city := cityBut(user, &main)
+	changeCity := changeCityAdmBut(user, &main)
+	returnBut := returnBut(user, &main)
 
 	main.Inline(
 		main.Row(city),
@@ -73,10 +73,10 @@ func (s *Buttons) CitySettings(user *tgSnWeatherBot.User) (*telebot.ReplyMarkup,
 	return main, city, changeCity, returnBut
 }
 
-func (s *Buttons) NamesList(user *tgSnWeatherBot.User) (*telebot.ReplyMarkup, telebot.Btn, telebot.Btn) {
+func (s *Buttons) NamesList(user *tgSnWeatherBot.User) (telebot.ReplyMarkup, telebot.Btn, telebot.Btn) {
 	main := s.Button
 
-	inlineList, returnBut, nameAddBut := names(user, main)
+	inlineList, returnBut, nameAddBut := names(user, &main)
 
 	main.InlineKeyboard = inlineList
 	return main, returnBut, nameAddBut
@@ -120,12 +120,12 @@ func nameSlc(i int, user *tgSnWeatherBot.User, main *telebot.ReplyMarkup) []tele
 }
 
 // Name return main, nameIn, delete, returnBut
-func (s *Buttons) Name(name string, userId int) (*telebot.ReplyMarkup, telebot.Btn, telebot.Btn, telebot.Btn) {
+func (s *Buttons) Name(name string, userId int) (telebot.ReplyMarkup, telebot.Btn, telebot.Btn, telebot.Btn) {
 	main := s.Button
 
 	nameIn := main.Data(name, "nameInline",  strconv.Itoa(userId), name)
 	deleteBut := main.Data("Удалить имя", "deleteName",  strconv.Itoa(userId), name)
-	returnBut := returnBut(&tgSnWeatherBot.User{UserId: userId}, main)
+	returnBut := returnBut(&tgSnWeatherBot.User{UserId: userId}, &main)
 
 	main.Inline(
 		main.Row(nameIn),
@@ -136,7 +136,7 @@ func (s *Buttons) Name(name string, userId int) (*telebot.ReplyMarkup, telebot.B
 }
 
 // YesOrNo return main, yes, no
-func (s *Buttons) YesOrNo(name string, userId int) (*telebot.ReplyMarkup, telebot.Btn, telebot.Btn) {
+func (s *Buttons) YesOrNo(name string, userId int) (telebot.ReplyMarkup, telebot.Btn, telebot.Btn) {
 	main := s.Button
 
 	yes := main.Data("Да", "Yes",  strconv.Itoa(userId), name)

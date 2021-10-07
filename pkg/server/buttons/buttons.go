@@ -8,14 +8,14 @@ import (
 )
 
 type Buttons struct {
-	Button *telebot.ReplyMarkup
+	Button telebot.ReplyMarkup
 }
 
-func NewButtons(b *telebot.ReplyMarkup) *Buttons {
+func NewButtons(b telebot.ReplyMarkup) *Buttons {
 	return &Buttons{Button: b}
 }
 
-func (s *Buttons) Main() *telebot.ReplyMarkup {
+func (s *Buttons) Main() telebot.ReplyMarkup {
 	main := s.Button
 	getWeather := main.Text("Погода")
 	profile := main.Text("Профиль")
@@ -26,7 +26,7 @@ func (s *Buttons) Main() *telebot.ReplyMarkup {
 	return main
 }
 
-func (s *Buttons) MainAdmin() *telebot.ReplyMarkup {
+func (s *Buttons) MainAdmin() telebot.ReplyMarkup {
 	main := s.Button
 
 	usersList := main.Text("Пользователи")
