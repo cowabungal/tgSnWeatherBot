@@ -9,14 +9,15 @@ import (
 
 func (s *Server) mainButtons (m *telebot.Message) {
 	logrus.Printf("password from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
-	s.bot.Send(m.Sender, "Привет. Я - бот, который подскажет тебе погоду на улице.", s.buttons.Main())
+	s.bot.Send(m.Sender, "Привет. Я - бот, который подскажет тебе погоду на улице.", s.button.Main())
 }
 
 func (s *Server) profile (m *telebot.Message) {
 	logrus.Printf("profile from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
 	user := s.NewUser(m.Sender)
-	profileInline := s.buttons.ProfileInline()
+	profileInline, cityBut := s.button.ProfileInline()
 	s.bot.Send(m.Sender, profileMessage(user), profileInline)
+	s.bot.Handle(&cityBut, s.changeCity)
 }
 
 func (s *Server) changeCity (c *telebot.Callback) {
@@ -80,10 +81,4 @@ func (s *Server) changeCityAnsAdm (m *telebot.Message) {
 	}
 
 	s.bot.Send(m.Sender, fmt.Sprintf("Город успешно изменен на: %s", city))
-}
-
-func (s *Server) text (m *telebot.Message) {
-	logrus.Printf("message from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
-	name := s.GetUserName(m.Sender.ID)
-	s.bot.Send(m.Sender, textMessage(name))
 }

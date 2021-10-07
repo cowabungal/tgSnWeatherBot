@@ -5,7 +5,7 @@ import (
 	"gopkg.in/tucnak/telebot.v2"
 )
 
-func (s *Server) getWeather (m *telebot.Message) {
+func (s *Server) GetWeather (m *telebot.Message) {
 	logrus.Printf("message from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
 	user := s.NewUser(m.Sender)
 
@@ -23,5 +23,5 @@ func (s *Server) getWeather (m *telebot.Message) {
 		return
 	}
 
-	logrus.Printf("Bot send message: <<weatherMessage>> to %s", m.Sender.Username)
+	logrus.Printf("Bot send message: 'weatherMessage' to %s", m.Sender.Username)
 }

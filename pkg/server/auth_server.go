@@ -40,7 +40,7 @@ func (s *Server) adminPass (m *telebot.Message) {
 		return
 	}
 
-	adminBut := s.buttons.MainAdmin()
+	adminBut := s.button.MainAdmin()
 	s.bot.Send(m.Sender, "Вы успешно залогинены в аккаунт администратора.", adminBut)
 }
 

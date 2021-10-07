@@ -1,2 +1,2 @@
-DROP TABLE names;
+DROP TABLE namesCount;
 DROP TABLE users;

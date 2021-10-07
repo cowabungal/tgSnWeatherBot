@@ -5,15 +5,16 @@ import (
 	"gopkg.in/tucnak/telebot.v2"
 	"log"
 	"os"
+	"tgSnWeatherBot/pkg/server/buttons"
 	"tgSnWeatherBot/pkg/service"
 	"time"
 )
 
 type Server struct {
 	service    *service.Service
-	bot        *telebot.Bot
-	buttons    *Buttons
-	data *Data
+	bot    *telebot.Bot
+	button *buttons.Buttons
+	data   *Data
 }
 
 type Data struct {
@@ -25,17 +26,13 @@ func NewData() *Data {
 }
 
 func (s *Server) InitRoutes() {
-	s.bot.Handle("Погода", s.getWeather)
-	s.bot.Handle(os.Getenv("BOT_PASSWORD"), s.mainButtons)
-	s.bot.Handle("/start", s.mainButtons)
-	newCity := changeCity(s.buttons.Button)
-
-	//unique цельный
-	s.bot.Handle(&newCity, s.changeCity)
+	s.bot.Handle("Погода", s.GetWeather)
 	s.bot.Handle("Профиль", s.profile)
 	s.bot.Handle("Юзер-панель", s.mainButtons)
-	s.bot.Handle("Админ-панель", s.admin)
 	s.bot.Handle("Пользователи", s.usersList)
+	s.bot.Handle(os.Getenv("BOT_PASSWORD"), s.mainButtons)
+	s.bot.Handle("/start", s.mainButtons)
+	s.bot.Handle("/admin", s.admin)
 	s.bot.Handle(telebot.OnText, s.text)
 }
 
@@ -101,7 +98,7 @@ func NewBotServer(s *service.Service) *Server {
 		return nil
 	}
 	menu := &telebot.ReplyMarkup{ResizeReplyKeyboard: true}
-	bu := NewButtons(menu)
+	bu := buttons.NewButtons(menu)
 	data := NewData()
-	return &Server{service: s, bot: b, buttons: bu, data: data}
+	return &Server{service: s, bot: b, button: bu, data: data}
 }

@@ -5,7 +5,7 @@ CREATE TABLE users
     user_id varchar (30) not null unique
 );
 
-CREATE TABLE names
+CREATE TABLE namesCount
 (
     id          serial                                      not null unique,
     name varchar (30),
