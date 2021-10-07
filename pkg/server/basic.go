@@ -7,21 +7,29 @@ import (
 	"strconv"
 )
 
-func (s *Server) mainButtons (m *telebot.Message) {
+func (s *Server) mainButtons(m *telebot.Message) {
 	logrus.Printf("password from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
 	s.bot.Send(m.Sender, "Привет. Я - бот, который подскажет тебе погоду на улице.", s.button.Main())
 }
 
-func (s *Server) profile (m *telebot.Message) {
+func (s *Server) profile(m *telebot.Message) {
 	logrus.Printf("profile from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
-	user := s.NewUser(m.Sender)
-	profileInline, cityBut := s.button.ProfileInline()
-	s.bot.Send(m.Sender, profileMessage(user), profileInline)
-	s.bot.Handle(&cityBut, s.changeCity)
+	user, err := s.getUser(m.Sender.ID)
+	if err != nil {
+		logrus.Error("profile: getUser: " + err.Error())
+		return
+	}
+
+	main, cityBut, namesBut := s.button.UserSettings(user)
+	//profileInline, cityBut, sendingSetting := s.button.ProfileInline()
+	s.bot.Send(m.Sender, profileMessage(user), main)
+
+	s.bot.Handle(&cityBut, s.citySettings)
+	s.bot.Handle(&namesBut, s.namesSettings)
 }
 
-func (s *Server) changeCity (c *telebot.Callback) {
-	err := s.bot.Respond(c, &telebot.CallbackResponse{Text: "Отправь название города"})
+func (s *Server) changeCity(c *telebot.Callback) {
+	err := s.bot.Respond(c, &telebot.CallbackResponse{})
 	if err != nil {
 		logrus.Error("changeCity: Respond: " + err.Error())
 	}
@@ -47,8 +55,20 @@ func (s *Server) changeCityAns (m *telebot.Message) {
 	s.bot.Send(m.Sender, fmt.Sprintf("Город успешно изменен на: %s", city))
 }
 
+/*func (s *Server) sendingSetting (c *telebot.Callback) {
+	err := s.bot.Respond(c, &telebot.CallbackResponse{})
+	if err != nil {
+		logrus.Error("sendingSetting: Respond: " + err.Error())
+	}
+
+	logrus.Printf("city from: %s; id: %d; ms: %s", c.Sender.Username, c.Sender.ID, c.Data)
+
+	s.bot.Edit(c.Sender, "Отправь название города")
+	s.bot.Handle(telebot.OnText, s.changeCityAns)
+}*/
+
 func (s *Server) changeCityAdm (c *telebot.Callback) {
-	err := s.bot.Respond(c, &telebot.CallbackResponse{Text: "Отправь название города"})
+	err := s.bot.Respond(c, &telebot.CallbackResponse{})
 	if err != nil {
 		logrus.Error("changeCity: Respond: " + err.Error())
 	}

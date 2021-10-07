@@ -43,6 +43,10 @@ func changeCityBut(b *telebot.ReplyMarkup) telebot.Btn {
 	return b.Data("Изменить город", "city")
 }
 
+func sendingSettingBut(b *telebot.ReplyMarkup) telebot.Btn {
+	return b.Data("Настроить рассылку", "sending")
+}
+
 func changeCityAdmBut(user *tgSnWeatherBot.User, b *telebot.ReplyMarkup) telebot.Btn {
 	return b.Data("Изменить город", "city", strconv.Itoa(user.UserId))
 }

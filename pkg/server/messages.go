@@ -28,6 +28,10 @@ func (s *Server) GetUserName(userId int) string {
 	return name
 }
 
+func sendingSettingMsg(user *tgSnWeatherBot.User) string {
+	return fmt.Sprintf("")
+}
+
 func textMessage(name string) string {
 	return fmt.Sprintf("%s, нажми на кнопку 'Погода'", name)
 }
