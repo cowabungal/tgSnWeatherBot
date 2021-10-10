@@ -57,6 +57,17 @@ func (s *Buttons) ReturnInline(user *tgSnWeatherBot.User) (telebot.ReplyMarkup, 
 	return main, returnBut
 }
 
+func (s *Buttons) CancelInline(user *tgSnWeatherBot.User) (telebot.ReplyMarkup, telebot.Btn) {
+	main := s.Button
+	cancelBut := cancelBut(user, &main)
+
+	main.Inline(
+		main.Row(cancelBut),
+	)
+
+	return main, cancelBut
+}
+
 // CitySettings return main, city, changeCityBut, returnBut
 func (s *Buttons) CitySettings(user *tgSnWeatherBot.User) (telebot.ReplyMarkup, telebot.Btn, telebot.Btn, telebot.Btn) {
 	main := s.Button

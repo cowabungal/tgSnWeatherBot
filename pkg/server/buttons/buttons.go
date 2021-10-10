@@ -64,9 +64,14 @@ func namesCountBut(user *tgSnWeatherBot.User, main *telebot.ReplyMarkup) telebot
 	return main.Data(fmt.Sprintf("Имена: %dшт.", len(user.Names)), "nameSettings", strconv.Itoa(user.UserId))
 }
 
+func cancelBut(user *tgSnWeatherBot.User, main *telebot.ReplyMarkup) telebot.Btn {
+	return main.Data("❌ Отмена", "cancel", strconv.Itoa(user.UserId))
+}
+
 func returnBut(user *tgSnWeatherBot.User, main *telebot.ReplyMarkup) telebot.Btn {
 	return main.Data("🔙 Назад", "return", strconv.Itoa(user.UserId))
 }
+
 
 func addNameBut(user *tgSnWeatherBot.User, main *telebot.ReplyMarkup) telebot.Btn {
 	return main.Data("✅ Добавить имя", "addName", strconv.Itoa(user.UserId))

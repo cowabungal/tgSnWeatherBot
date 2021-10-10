@@ -236,12 +236,23 @@ func (s *Server) sendMessage(c *telebot.Callback) {
 		logrus.Error("sendMessage: Respond: " + err.Error())
 	}
 
+	userId, _ := strconv.Atoi(c.Data)
+	user, err := s.getUser(userId)
+	if err != nil {
+		logrus.Error("preAddName: getUser: " + err.Error())
+		return
+	}
+
 	logrus.Printf("sendMessage from: %s; id: %d; ms: %s", c.Sender.Username, c.Sender.ID, c.Data)
 
+	main, cancelBut := s.button.CancelInline(user)
+
+	s.bot.Edit(c.Message, fmt.Sprintf("Отправка сообщения пользователю: %s", user.Username), &main)
 	s.bot.Send(c.Sender, "Отправь текст сообщения")
 
 	s.data.prevCallback = c
 	s.bot.Handle(telebot.OnText, s.resendMessage)
+	s.bot.Handle(&cancelBut, s.resendMessageCancel)
 }
 
 func (s *Server) resendMessage(m *telebot.Message) {
@@ -263,4 +274,13 @@ func (s *Server) resendMessage(m *telebot.Message) {
 	}
 
 	s.bot.Send(c.Sender, "Сообщение успешно доставлено")
+}
+
+func (s *Server) resendMessageCancel(c *telebot.Callback) {
+	err := s.bot.Respond(c, &telebot.CallbackResponse{})
+	if err != nil {
+		logrus.Error("resendMessageCancel: Respond: " + err.Error())
+	}
+
+	s.bot.Send(c.Sender,"Отправка сообщения отменена")
 }
