@@ -40,6 +40,7 @@ func (s *Buttons) UserSettings(user *tgSnWeatherBot.User) (telebot.ReplyMarkup, 
 	main.Inline(
 		main.Row(city),
 		main.Row(namesCount),
+
 	)
 
 	return main, city, namesCount

@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/tucnak/telebot.v2"
 	"tgSnWeatherBot"
 )
 
@@ -42,4 +43,7 @@ func usersListMessage(list []tgSnWeatherBot.User) string {
 
 func userSettingsMessage(user *tgSnWeatherBot.User) string {
 	return fmt.Sprintf("Настройки пользователя: %s", user.Username)
+}
+func toAdminMessage(upd *telebot.Update) string {
+	return fmt.Sprintf("📝 admin: msg from: %s; ms: %s;", upd.Message.Sender.Username, upd.Message.Text)
 }

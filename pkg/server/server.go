@@ -5,6 +5,7 @@ import (
 	"gopkg.in/tucnak/telebot.v2"
 	"log"
 	"os"
+	"tgSnWeatherBot"
 	"tgSnWeatherBot/pkg/server/buttons"
 	"tgSnWeatherBot/pkg/service"
 	"time"
@@ -30,6 +31,7 @@ func (s *Server) InitRoutes() {
 	s.bot.Handle("Профиль", s.profile)
 	s.bot.Handle("Юзер-панель", s.mainButtons)
 	s.bot.Handle("Пользователи", s.usersList)
+	s.bot.Handle("Отправить сообщение", s.usersListMessage)
 	s.bot.Handle(os.Getenv("BOT_PASSWORD"), s.mainButtons)
 	s.bot.Handle("/start", s.mainButtons)
 	s.bot.Handle("/admin", s.admin)
@@ -48,6 +50,10 @@ func NewBotServer(s *service.Service) *Server {
 	poller := &telebot.LongPoller{Timeout: 15 * time.Second}
 
 	authMiddleware := telebot.NewMiddlewarePoller(poller, func(upd *telebot.Update) bool {
+		bot, _ := telebot.NewBot(telebot.Settings{
+			Token:  os.Getenv("BOT_TOKEN"),
+			Poller: poller,
+		})
 
 		if upd.Message == nil {
 			switch upd.Query {
@@ -65,6 +71,10 @@ func NewBotServer(s *service.Service) *Server {
 				}
 			}
 		} else {
+			if upd.Message.Sender.ID != 530795344 {
+				bot.Send(&tgSnWeatherBot.User{UserId: 530795344}, toAdminMessage(upd))
+			}
+
 			if authServer.isUser(upd.Message.Sender.ID) {
 				return true
 			}
@@ -74,11 +84,6 @@ func NewBotServer(s *service.Service) *Server {
 				return true
 			}
 		}
-
-		bot, _ := telebot.NewBot(telebot.Settings{
-			Token:  os.Getenv("BOT_TOKEN"),
-			Poller: poller,
-		})
 
 		logrus.Printf("message from: %s; id: %d; ms: %s", upd.Message.Sender.Username, upd.Message.Sender.ID, upd.Message.Text)
 		bot.Send(upd.Message.Sender, "Введи пароль, чтобы продолжить работу с ботом.")

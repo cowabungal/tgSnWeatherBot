@@ -30,9 +30,10 @@ func (s *Buttons) MainAdmin() telebot.ReplyMarkup {
 	main := s.Button
 
 	usersList := main.Text("Пользователи")
+	message := main.Text("Отправить сообщение")
 	user := main.Text("Юзер-панель")
 	main.Reply(
-		main.Row(usersList),
+		main.Row(usersList, message),
 		main.Row(user),
 	)
 
@@ -69,4 +70,8 @@ func returnBut(user *tgSnWeatherBot.User, main *telebot.ReplyMarkup) telebot.Btn
 
 func addNameBut(user *tgSnWeatherBot.User, main *telebot.ReplyMarkup) telebot.Btn {
 	return main.Data("✅ Добавить имя", "addName", strconv.Itoa(user.UserId))
+}
+
+func messageBut(user *tgSnWeatherBot.User, main *telebot.ReplyMarkup) telebot.Btn {
+	return main.Data("Отправить сообщение", "sendMessage", strconv.Itoa(user.UserId))
 }

@@ -206,3 +206,61 @@ func (s *Server) addName(m *telebot.Message) {
 
 	s.bot.Send(m.Sender, fmt.Sprintf("Имя '%s' для пользователя: %s успешно добавлено.", name, user.Username))
 }
+func (s *Server) usersListMessage(m *telebot.Message) {
+	logrus.Printf("usersListMessage from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
+
+	err := s.service.Authorization.IsAdmin(m.Sender.ID)
+	if err != nil {
+		return
+	}
+
+	// получаем список юзеров
+	usersList, err := s.service.Admin.UsersList()
+	if err != nil {
+		return
+	}
+
+	// получаем сгусток инлайн кнопок и массив самих кнопок
+	usersListInline, usersButtons := s.button.UserList(usersList)
+	s.bot.Send(m.Sender, usersListMessage(usersList), &usersListInline)
+
+	// обработчик нажатий на юзера
+	for _, v := range usersButtons {
+		s.bot.Handle(&v, s.sendMessage)
+	}
+}
+
+func (s *Server) sendMessage(c *telebot.Callback) {
+	err := s.bot.Respond(c, &telebot.CallbackResponse{})
+	if err != nil {
+		logrus.Error("sendMessage: Respond: " + err.Error())
+	}
+
+	logrus.Printf("sendMessage from: %s; id: %d; ms: %s", c.Sender.Username, c.Sender.ID, c.Data)
+
+	s.bot.Send(c.Sender, "Отправь текст сообщения")
+
+	s.data.prevCallback = c
+	s.bot.Handle(telebot.OnText, s.resendMessage)
+}
+
+func (s *Server) resendMessage(m *telebot.Message) {
+	logrus.Printf("resendMessage from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
+
+	c := s.data.prevCallback
+	userId, _ := strconv.Atoi(c.Data)
+	user, err := s.getUser(userId)
+	if err != nil {
+		logrus.Error("resendMessage: getUser: " + err.Error())
+		return
+	}
+
+	_, err = s.bot.Send(user, m.Text)
+	if err != nil {
+		logrus.Error("resendMessage: bot.Send: " + err.Error())
+		s.bot.Send(m.Sender, "Ошибка. Сообщение не доставлено.")
+		return
+	}
+
+	s.bot.Send(c.Sender, "Сообщение успешно доставлено")
+}
