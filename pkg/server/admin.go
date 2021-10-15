@@ -205,6 +205,7 @@ func (s *Server) addName(m *telebot.Message) {
 	name, err := s.service.User.AddName(userId, m.Text)
 
 	s.bot.Send(m.Sender, fmt.Sprintf("Имя '%s' для пользователя: %s успешно добавлено.", name, user.Username))
+	s.bot.Handle(telebot.OnText, s.text)
 }
 func (s *Server) usersListMessage(m *telebot.Message) {
 	logrus.Printf("usersListMessage from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
@@ -239,7 +240,7 @@ func (s *Server) sendMessage(c *telebot.Callback) {
 	userId, _ := strconv.Atoi(c.Data)
 	user, err := s.getUser(userId)
 	if err != nil {
-		logrus.Error("preAddName: getUser: " + err.Error())
+		logrus.Error("sendMessage: getUser: " + err.Error())
 		return
 	}
 
@@ -256,9 +257,13 @@ func (s *Server) sendMessage(c *telebot.Callback) {
 }
 
 func (s *Server) resendMessage(m *telebot.Message) {
+	c := s.data.prevCallback
+	if c.Sender.ID != m.Sender.ID {
+		return
+	}
+
 	logrus.Printf("resendMessage from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
 
-	c := s.data.prevCallback
 	userId, _ := strconv.Atoi(c.Data)
 	user, err := s.getUser(userId)
 	if err != nil {
@@ -283,4 +288,5 @@ func (s *Server) resendMessageCancel(c *telebot.Callback) {
 	}
 
 	s.bot.Send(c.Sender,"Отправка сообщения отменена")
+	s.bot.Handle(telebot.OnText, s.text)
 }
