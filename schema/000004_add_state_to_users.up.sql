@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD state VARCHAR(30) NOT NULL DEFAULT 'default';

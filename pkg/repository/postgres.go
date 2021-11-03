@@ -8,7 +8,10 @@ import (
 const (
 	usersTable = "users"
 	namesTable = "names"
+	callbacksTable = "callbacks"
 	cityColumn = "city"
+	stateColumn = "state"
+	callbackDataColumn = "callback_data"
 	adminsTable = "admins"
 )
 

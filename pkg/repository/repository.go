@@ -26,6 +26,13 @@ type User interface {
 	Name(userId int) (string, error)
 	City(userId int) (string, error)
 	ChangeCity (userId int, newCity string) (string, error)
+	State(userId int) (string, error)
+	ChangeState(userId int, newState string) (string, error)
+	AddCallbackId(userId int, callbackId string) error
+	AddCallbackData(callbackId, callbackData string) error
+	GetCallbackData(userId int) (string, error)
+	GetCallbackId(userId int) (int, error)
+	DeleteCallback(userId int) error
 	Info (userId int) (*tgSnWeatherBot.User, error)
 	DeleteName(userId int, name string) error
 	AddName(userId int, name string) (string, error)

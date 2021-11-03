@@ -8,6 +8,7 @@ import (
 func (s *Server) GetWeather (m *telebot.Message) {
 	logrus.Printf("message from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
 	user := s.NewUser(m.Sender)
+	s.service.ChangeState(m.Sender.ID, "default")
 
 	weatherData, err := s.service.Weather.Get(user.City)
 	if err != nil {

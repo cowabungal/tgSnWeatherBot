@@ -12,6 +12,7 @@ type Buttons struct {
 }
 
 func NewButtons(b telebot.ReplyMarkup) *Buttons {
+	b.ResizeReplyKeyboard = true
 	return &Buttons{Button: b}
 }
 

@@ -35,15 +35,17 @@ func (s *AuthServer) createUser(username string, userId int) {
 }
 
 func (s *Server) adminPass (m *telebot.Message) {
-	err := s.service.Authorization.CreateAdmin(m.Sender.Username, m.Sender.ID)
-	if err != nil {
-		return
+	if os.Getenv("ADMIN_PASSWORD") == m.Text {
+		err := s.service.Authorization.CreateAdmin(m.Sender.Username, m.Sender.ID)
+		if err != nil {
+			return
+		}
+
+		adminBut := s.button.MainAdmin()
+		s.bot.Send(m.Sender, "Вы успешно залогинены в аккаунт администратора.", adminBut)
+	} else {
+		s.bot.Send(m.Sender, "Пароль неверный. Нажмите /admin и введите корректный пароль для доступа к админ-панели.")
 	}
 
-	adminBut := s.button.MainAdmin()
-	s.bot.Send(m.Sender, "Вы успешно залогинены в аккаунт администратора.", adminBut)
-}
-
-func (s *Server) adminNoPass (m *telebot.Message) {
-	s.bot.Send(m.Sender, "Пароль неверный. Введите корректный пароль для доступа к админ-панели.")
+	s.service.User.ChangeState(m.Sender.ID, "default")
 }

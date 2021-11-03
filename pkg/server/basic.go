@@ -38,58 +38,76 @@ func (s *Server) changeCity(c *telebot.Callback) {
 	logrus.Printf("city from: %s; id: %d; ms: %s", c.Sender.Username, c.Sender.ID, c.Data)
 
 	s.bot.Send(c.Sender, "Отправь название города")
-	s.bot.Handle(telebot.OnText, s.changeCityAns)
+	s.service.User.ChangeState(c.Sender.ID, "changeCity")
+
+	s.data.prevCallback = c
+	err = s.service.User.AddCallbackId(c.Sender.ID, c.ID)
+	if err != nil {
+		logrus.Error("changeCity: AddCallbackId: " + err.Error())
+	}
+
+	err = s.service.User.AddCallbackData(c.ID, c.Data)
+	if err != nil {
+		logrus.Error("changeCity: AddCallbackId: " + err.Error())
+	}
 }
 
 func (s *Server) changeCityAns (m *telebot.Message) {
+	_, err := s.service.User.GetCallbackId(m.Sender.ID)
+	if err != nil {
+		logrus.Error("changeCityAns: GetCallbackId: " + err.Error())
+		return
+	}
+
 	logrus.Printf("city from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
 
 	user := s.NewUser(m.Sender)
 	city := m.Text
 
-	city, err := s.service.User.ChangeCity(user.UserId, city)
+	city, err = s.service.User.ChangeCity(user.UserId, city)
 	if err != nil {
 		s.bot.Send(m.Sender, "Ошибка в названии города.")
 		return
 	}
 
 	s.bot.Send(m.Sender, fmt.Sprintf("Город успешно изменен на: %s", city))
+	s.service.User.ChangeState(user.UserId, "default")
 }
-
-/*func (s *Server) sendingSetting (c *telebot.Callback) {
-	err := s.bot.Respond(c, &telebot.CallbackResponse{})
-	if err != nil {
-		logrus.Error("sendingSetting: Respond: " + err.Error())
-	}
-
-	logrus.Printf("city from: %s; id: %d; ms: %s", c.Sender.Username, c.Sender.ID, c.Data)
-
-	s.bot.Edit(c.Sender, "Отправь название города")
-	s.bot.Handle(telebot.OnText, s.changeCityAns)
-}*/
 
 func (s *Server) changeCityAdm (c *telebot.Callback) {
 	err := s.bot.Respond(c, &telebot.CallbackResponse{})
 	if err != nil {
-		logrus.Error("changeCity: Respond: " + err.Error())
+		logrus.Error("changeCitAdmy: Respond: " + err.Error())
 	}
 
 	logrus.Printf("city from: %s; id: %d; ms: %s", c.Sender.Username, c.Sender.ID, c.Data)
 
 	s.bot.Send(c.Sender, "Отправь название города")
+	s.service.User.ChangeState(c.Sender.ID, "changeCityAdm")
 
-	s.data.prevCallback = c
-	s.bot.Handle(telebot.OnText, s.changeCityAnsAdm)
+	err = s.service.User.AddCallbackId(c.Sender.ID, c.ID)
+	if err != nil {
+		logrus.Error("changeCityAdm: AddCallbackId: " + err.Error())
+	}
+	err = s.service.User.AddCallbackData(c.ID, c.Data)
+	if err != nil {
+		logrus.Error("changeCityAdm: AddCallbackData: " + err.Error())
+	}
 }
 
 func (s *Server) changeCityAnsAdm (m *telebot.Message) {
-	logrus.Printf("city from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
-	c := s.data.prevCallback
-
-	userId, _ := strconv.Atoi(c.Data)
-	user, err := s.getUser(userId)
+	userId, err := s.service.User.GetCallbackData(m.Sender.ID)
 	if err != nil {
-		logrus.Error("citySettings: getUser: " + err.Error())
+		logrus.Error("changeCityAnsAdm: GetCallbackData: " + err.Error())
+		return
+	}
+
+	logrus.Printf("city from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
+
+	userIdInt, _ := strconv.Atoi(userId)
+	user, err := s.getUser(userIdInt)
+	if err != nil {
+		logrus.Error("citySettingsAnsAdm: getUser: " + err.Error())
 		return
 	}
 
@@ -102,4 +120,14 @@ func (s *Server) changeCityAnsAdm (m *telebot.Message) {
 	}
 
 	s.bot.Send(m.Sender, fmt.Sprintf("Город успешно изменен на: %s", city))
+	s.service.User.ChangeState(m.Sender.ID, "default")
+	s.service.User.DeleteCallback(m.Sender.ID)
+}
+
+func notOwner(c *telebot.Callback, m *telebot.Message) bool {
+	if c.Sender.ID != m.Sender.ID {
+		return true
+	}
+
+	return false
 }

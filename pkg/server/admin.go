@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/tucnak/telebot.v2"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -15,8 +14,7 @@ func (s *Server) admin (m *telebot.Message) {
 	err := s.service.Authorization.IsAdmin(m.Sender.ID)
 	if err != nil {
 		s.bot.Send(m.Sender, "Введите пароль для доступа к админ-панели.")
-		s.bot.Handle(os.Getenv("ADMIN_PASSWORD"), s.adminPass)
-		s.bot.Handle(telebot.OnText, s.adminNoPass)
+		s.service.User.ChangeState(m.Sender.ID, "adminPass")
 	} else {
 		adminBut := s.button.MainAdmin()
 		s.bot.Send(m.Sender, "Вы успешно вошли в аккаунт администратора.", &adminBut)
@@ -57,6 +55,8 @@ func (s *Server) userSettings(c *telebot.Callback) {
 		return
 	}
 
+	s.service.ChangeState(c.Sender.ID, "default")
+
 	main, cityBut, namesBut := s.button.UserSettings(user)
 
 	s.bot.Edit(c.Message, userSettingsMessage(user), &main)
@@ -88,6 +88,8 @@ func (s *Server) citySettings(c *telebot.Callback) {
 func (s *Server) namesSettings(c *telebot.Callback) {
 	logrus.Printf("namesSettings from: %s; id: %d; data: %s", c.Sender.Username, c.Sender.ID, c.Data)
 	s.bot.Respond(c, &telebot.CallbackResponse{})
+
+	s.service.User.ChangeState(c.Sender.ID, "default")
 
 	userId, _ := strconv.Atoi(c.Data)
 	user, err := s.getUser(userId)
@@ -186,14 +188,17 @@ func (s *Server) preAddName(c *telebot.Callback) {
 	main, returnBut := s.button.ReturnInline(user)
 
 	s.bot.Edit(c.Message,fmt.Sprintf("Отправьте новое имя для пользователя: %s", user.Username), &main)
+	s.service.User.ChangeState(c.Sender.ID, "addName")
 	s.bot.Handle(&returnBut, s.namesSettings)
 
 	s.data.prevCallback = c
-	s.bot.Handle(telebot.OnText, s.addName)
 }
 
 func (s *Server) addName(m *telebot.Message) {
 	c := s.data.prevCallback
+	//if notOwner(c, m) {
+	//	return
+	//}
 
 	userId, _ := strconv.Atoi(c.Data)
 	user, err := s.getUser(userId)
@@ -205,8 +210,9 @@ func (s *Server) addName(m *telebot.Message) {
 	name, err := s.service.User.AddName(userId, m.Text)
 
 	s.bot.Send(m.Sender, fmt.Sprintf("Имя '%s' для пользователя: %s успешно добавлено.", name, user.Username))
-	s.bot.Handle(telebot.OnText, s.text)
+	s.service.User.ChangeState(m.Sender.ID, "default")
 }
+
 func (s *Server) usersListMessage(m *telebot.Message) {
 	logrus.Printf("usersListMessage from: %s; id: %d; ms: %s", m.Sender.Username, m.Sender.ID, m.Text)
 
@@ -250,15 +256,15 @@ func (s *Server) sendMessage(c *telebot.Callback) {
 
 	s.bot.Edit(c.Message, fmt.Sprintf("Отправка сообщения пользователю: %s", user.Username), &main)
 	s.bot.Send(c.Sender, "Отправь текст сообщения")
+	s.service.ChangeState(c.Sender.ID, "resendMessage")
 
 	s.data.prevCallback = c
-	s.bot.Handle(telebot.OnText, s.resendMessage)
 	s.bot.Handle(&cancelBut, s.resendMessageCancel)
 }
 
 func (s *Server) resendMessage(m *telebot.Message) {
 	c := s.data.prevCallback
-	if c.Sender.ID != m.Sender.ID {
+	if notOwner(c, m) {
 		return
 	}
 
@@ -288,5 +294,5 @@ func (s *Server) resendMessageCancel(c *telebot.Callback) {
 	}
 
 	s.bot.Send(c.Sender,"Отправка сообщения отменена")
-	s.bot.Handle(telebot.OnText, s.text)
+	s.service.User.ChangeState(c.Sender.ID, "default")
 }

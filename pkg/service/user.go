@@ -40,6 +40,34 @@ func (s *UserService) ChangeCity(userId int, newCity string) (string, error) {
 	return s.repo.User.ChangeCity(userId, newCity)
 }
 
+func (s *UserService) State(userId int) (string, error) {
+	return s.repo.User.State(userId)
+}
+
+func (s *UserService) ChangeState(userId int, newState string) (string, error) {
+	return s.repo.User.ChangeState(userId, newState)
+}
+
+func (s *UserService) AddCallbackId(userId int, callbackId string) error {
+	return s.repo.User.AddCallbackId(userId, callbackId)
+}
+
+func (s *UserService) AddCallbackData(callbackId, callbackData string) error {
+	return s.repo.User.AddCallbackData(callbackId, callbackData)
+}
+
+func (s *UserService) GetCallbackData(userId int) (string, error) {
+	return s.repo.User.GetCallbackData(userId)
+}
+
+func (s *UserService) GetCallbackId(userId int) (int, error) {
+	return s.repo.User.GetCallbackId(userId)
+}
+
+func (s *UserService) DeleteCallback(userId int) error {
+	return s.repo.User.DeleteCallback(userId)
+}
+
 func validateCity(newCity string) error {
 	ws := NewWeatherService()
 	_, err := ws.Get(newCity)
